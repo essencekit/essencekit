@@ -1,0 +1,11 @@
+@if(posts.length) Look at me! 
+    @if(true)
+        <ul>
+            @each(post in posts)
+                <li>@[post.title]</li>
+            @end
+        </ul>
+    @else
+        <p>Nothing to see here</p>
+    @endif 
+@endif 

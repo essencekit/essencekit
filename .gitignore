@@ -1,0 +1,15 @@
+# Node
+node_modules/
+package-lock.json
+
+# Build output
+Pub/
+
+# env
+.env
+.env.local
+
+# Editor junk
+.DS_Store
+.vscode/
+.idea/

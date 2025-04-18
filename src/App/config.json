@@ -1,0 +1,28 @@
+{
+    "rules": {
+        "enabled": true,
+        "strict": true,
+        "sources": [
+            "Rules/customRules.js"
+        ]
+    },
+    "postProcess": {
+        "enabled": true,
+        "sources": [
+            "PostProcess/minify.js"
+        ]
+    },
+    "auth": {
+        "endpoint": "http://localhost:3001/api/auth/login"
+    },
+    "apiGroups": {
+        "main": "https://jsonplaceholder.typicode.com",
+        "openai": "https://api.openai.com/v1"
+    },
+    "apiAuth": {
+        "openai": {
+            "type": "Bearer",
+            "token": "OPENAI_KEY"
+        }
+    }
+}

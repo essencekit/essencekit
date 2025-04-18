@@ -1,0 +1,35 @@
+@{ThemeScript}
+
+<div>@{HelloWorld} @{SomeButton: {"year": "2025"}}</div>
+
+@{Posts}
+
+<script>
+    window.addEventListener('globalStateReady', () => {
+        // Subscribe ONLY to loggedIn state:
+        globalState.subscribe(
+            (loggedIn) => {
+                console.log('🔑 LoggedIn state changed:', loggedIn);
+            },
+            (state) => state.loggedIn
+        );
+
+        // Subscribe ONLY to theme state:
+        globalState.subscribe(
+            (theme) => {
+                console.log('🎨 Theme state changed:', theme);
+            },
+            (state) => state.theme
+        );
+
+        console.log('✅ Updating loggedIn ONLY:');
+        globalState.setState({ loggedIn: true });
+
+        console.log('✅ Updating unrelated userData ONLY:');
+        globalState.setState({ userData: { name: 'Alice' } });
+    });
+</script>
+
+@{ButtonHaha} @{ButtonGigi}
+
+@{Bless}

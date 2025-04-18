@@ -1,0 +1,14 @@
+{
+    "title": "OpenAI Chat",
+    "extends": "BasePage",
+    "description": "Simple chat interface for OpenAI's API.",
+    "render": true,
+    "api": [
+        {
+            "dataGroup": "openai",
+            "dataSource": "/chat/completions",
+            "postType": true,
+            "postName": "sendChat"
+        }
+    ]
+}

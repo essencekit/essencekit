@@ -1,0 +1,15 @@
+{
+    "extends": "BasePage",
+    "title": "essencekit Home Page",
+    "description": "essencekit is a minimalist web framework focused on speed, simplicity, and fun.",
+    "render": true,
+    "auth": true,
+    "api": [
+        {
+            "dataGroup": "main",
+            "dataSource": "/posts",
+            "postType": true,
+            "postName": "sendPost"
+        }
+    ]
+}

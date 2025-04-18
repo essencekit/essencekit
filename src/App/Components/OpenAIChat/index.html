@@ -1,0 +1,111 @@
+<style>
+    #openai-chat-form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        max-width: 300px;
+    }
+    #openai-chat-form input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+    #openai-chat-form button {
+        padding: 10px 20px;
+        background-color: #030303;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    #ai-response {
+        font-size: 16px;
+        margin-top: 20px;
+    }
+    #ai-response::before {
+        content: 'AI: ';
+        font-weight: bold;
+    }
+</style>
+
+<form id="openai-chat-form">
+    <input name="prompt" placeholder="Ask AI something..." />
+    <button type="submit">Ask</button>
+</form>
+
+<p id="ai-response"></p>
+
+@{ClearMemory}
+
+<script type="module">
+    import State from '@ASSETS@/Core/State/Manager.js';
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('openai-chat-form');
+        const responseEl = document.getElementById('ai-response');
+
+        form.prompt.focus();
+
+        // Initialize local state
+        const chatState = new State({
+            chatHistory: JSON.parse(localStorage.getItem('chatHistory') || '[]'),
+        });
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            responseEl.innerText = '...thinking...';
+
+            const prompt = form.prompt.value;
+
+            console.log('🧠 Asking OpenAI:', prompt);
+
+            const history = chatState.getState().chatHistory;
+
+            const messages = [
+                {
+                    role: 'system',
+                    content: 'You are a helpful assistant.',
+                },
+                ...history,
+                {
+                    role: 'user',
+                    content: prompt,
+                },
+            ];
+
+            try {
+                const res = await essenceAPI.sendChat({
+                    body: {
+                        model: 'gpt-4.1-nano',
+                        messages,
+                    },
+                });
+
+                console.log('📩 OpenAI response:', res);
+                const aiMessage =
+                    res.choices?.[0]?.message?.content?.trim() || 'No response';
+
+                responseEl.innerText = aiMessage;
+
+                // Update local state only
+                chatState.setState({
+                    chatHistory: [
+                        ...history,
+                        { role: 'user', content: prompt },
+                        { role: 'assistant', content: aiMessage },
+                    ],
+                });
+
+                // Store to localStorage
+                localStorage.setItem(
+                    'chatHistory',
+                    JSON.stringify(chatState.getState().chatHistory)
+                );
+            } catch (err) {
+                console.error('❌ OpenAI request failed:', err);
+                responseEl.innerText = 'Error contacting OpenAI';
+            }
+
+            form.prompt.value = '';
+        };
+    });
+</script>

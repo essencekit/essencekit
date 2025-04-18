@@ -1,0 +1,102 @@
+<style>
+    #auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 300px;
+    }
+    #auth-form input {
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+    #auth-form button {
+        padding: 10px;
+        background-color: #000;
+        border: 1px solid;
+        color: white;
+        cursor: pointer;
+    }
+    #auth-form button:hover {
+        background-color: #303030;
+    }
+    #welcome-user {
+        font-size: 20px;
+        margin: 20px 0;
+    }
+</style>
+
+<form
+    onsubmit="
+    essenceAuth.login({ 
+        email: this.email.value, 
+        password: this.password.value
+    }).then(res => {
+        if (res.token) {
+            globalState.setState({ loggedIn: true, userData: res.user });
+        } else {
+            alert('Invalid login credentials');
+        }
+    }); 
+    return false;
+"
+>
+    <div id="auth-form" style="display: none">
+        <input name="email" placeholder="Email" />
+        <input name="password" type="password" placeholder="Password" />
+        <button type="submit">Login</button>
+    </div>
+
+    <div id="welcome-user" style="display: none"></div>
+</form>
+
+<script>
+    window.addEventListener('globalStateReady', () => {
+        const authForm = document.getElementById('auth-form');
+        const mainContent = document.getElementById('main-content');
+        const welcomeUser = document.getElementById('welcome-user');
+
+        globalState.subscribe(
+            (loggedIn) => {
+                console.log('🔑 LoggedIn state changed:', loggedIn);
+                if (loggedIn) {
+                    const userName =
+                        globalState.getState().userData.name || 'User';
+                    welcomeUser.textContent = `Welcome, ${userName}!`;
+                    welcomeUser.style.display = 'block';
+                    mainContent.style.display = 'block';
+                    authForm.style.display = 'none';
+                } else {
+                    welcomeUser.style.display = 'none';
+                    mainContent.style.display = 'none';
+                    authForm.style.display = 'block';
+                }
+            },
+            (state) => state.loggedIn
+        );
+
+        // Subscribe ONLY to theme state (if needed)
+        globalState.subscribe(
+            (theme) => {
+                console.log('🎨 Theme state changed:', theme);
+            },
+            (state) => state.theme
+        );
+
+        // Initial login state check
+        if (essenceAuth.isLoggedIn()) {
+            const userData = essenceAuth.getUser();
+            globalState.setState({
+                loggedIn: true,
+                userData: userData
+            });
+            welcomeUser.textContent = `Welcome, ${userData.name}!`;
+            welcomeUser.style.display = 'block';
+            mainContent.style.display = 'block';
+            authForm.style.display = 'none';
+        } else {
+            welcomeUser.style.display = 'none';
+            mainContent.style.display = 'none';
+            authForm.style.display = 'flex';
+        }
+    });
+</script>

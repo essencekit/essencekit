@@ -1,0 +1,23 @@
+{
+    "name": "essencekit",
+    "version": "0.0.1",
+    "description": "The web, unbloated.",
+    "type": "module",
+    "main": "./src/index.js",
+    "bin": {
+        "essencekit": "./bin/cli.js"
+    },
+    "scripts": {
+        "cli": "node ./bin/cli.js"
+    },
+    "dependencies": {
+        "dotenv": "^16.5.0",
+        "fs-extra": "^11.3.0",
+        "node-fetch": "^2.7.0"
+    },
+    "devDependencies": {
+        "esbuild": "^0.25.2"
+    },
+    "author": "true spirit",
+    "license": "MIT"
+}

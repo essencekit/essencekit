@@ -1,0 +1,38 @@
+<style>
+    body[data-theme='light'] {
+        background: #fff;
+        color: #111;
+    }
+
+    body[data-theme='dark'] {
+        background: #111;
+        color: #fff;
+    }
+
+    body[data-theme='dark'] button {
+        background: #fff;
+        color: #111;
+    }
+</style>
+
+<div class="some-component">
+    <button id="toggle-theme">Toggle Theme</button>
+</div>
+
+<script>
+    window.addEventListener('globalStateReady', () => {
+        document
+            .getElementById('toggle-theme')
+            ?.addEventListener('click', () => {
+                const currentTheme = globalState.getState().theme;
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.getElementById(
+                    'toggle-theme'
+                ).innerText = `Theme: ${newTheme}`;
+
+                globalState.setState({ theme: newTheme });
+                document.body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+    });
+</script>

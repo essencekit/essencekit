@@ -1,0 +1,10 @@
+<form
+    onsubmit="essenceAPI.sendPost({ 
+title: this.title.value, 
+message: this.message.value,
+userId: 1}).then((res) => console.log('✅ Sent:', res)); return false;"
+>
+    <input name="title" placeholder="Type a title..." />
+    <input name="message" placeholder="Type a blessing..." />
+    <button type="submit">Bless essencekit</button>
+</form>

@@ -1,0 +1,10 @@
+{
+    "api": [
+        {
+            "dataGroup": "main",
+            "dataSource": "/posts",
+            "getType": "static",
+            "injectAs": "posts"
+        }
+    ]
+}
