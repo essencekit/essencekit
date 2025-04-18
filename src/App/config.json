@@ -13,7 +13,7 @@
         ]
     },
     "auth": {
-        "endpoint": "http://localhost:3001/api/auth/login"
+        "endpoint": "http://localhost:3000/api/auth/login"
     },
     "apiGroups": {
         "main": "https://jsonplaceholder.typicode.com",
