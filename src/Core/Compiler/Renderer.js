@@ -9,6 +9,7 @@ import Rules from '../Rules/Rules.js';
 import { injectAuthScript } from '../Auth/index.js';
 import { loadApiData } from '../Api/index.js';
 import { parseLogicBlocks } from '../utils/logic.js';
+import { protectCodeBlocks, restoreCodeBlocks } from "../utils/markup.js";
 import { writeFile, ensureDir } from '../utils/fileIO.js';
 import logger from '../utils/logger.js';
 
@@ -33,7 +34,10 @@ try {
 
 export default class Renderer {
 
+    static env = 'dev';
+
     static async renderAll(env = 'dev') {
+        this.env = env;
         const outputDir = path.join(pubDir, env);
 
         logger.info(`Starting render process for environment: ${env}`);
@@ -61,15 +65,15 @@ export default class Renderer {
 
             if (ruleFailures.length) {
                 const isStrictMode = env === 'prod' || ruleConfig?.strict;
-            
+
                 logger[isStrictMode ? 'error' : 'warn'](
                     isStrictMode
                         ? '❌ Build failed due to rule violations:'
                         : '⚠️ Rule warnings detected:'
                 );
-            
+
                 ruleFailures.forEach(failure => logger[isStrictMode ? 'error' : 'warn'](failure));
-            
+
                 if (isStrictMode) {
                     if (fs.existsSync(tmpOutputDir)) await fsExtra.remove(tmpOutputDir);
                     process.exit(1);
@@ -88,10 +92,6 @@ export default class Renderer {
             if (injections.length) {
                 renderedHTML = renderedHTML.replace('</body>', `${injections.join('\n')}</body>`);
             }
-
-            renderedHTML = renderedHTML
-                .replace(/@ENV@/g, env)
-                .replace(/@ASSETS@/g, `/${env}/assets`);
 
             await ensureDir(path.dirname(outputFilePath));
 
@@ -129,10 +129,21 @@ export default class Renderer {
         logger.success(`Build complete. Output saved to: /Pub/${env}`);
     }
 
-    static async renderComponent(component, allComponents, data = {}, innerContent = '') {
+    static async renderComponent(
+        component,
+        allComponents,
+        data = {},
+        innerContent = '',
+        codeStore = [],
+        isRoot = true
+    ) {
         // 1. Load HTML synchronously
         const componentHTMLPath = path.resolve(component.path, component.entryFile || 'index.html');
         let htmlContent = fs.readFileSync(componentHTMLPath, 'utf8');
+
+        // Protect code/pre blocks
+        ({ safe: htmlContent } = protectCodeBlocks(htmlContent, codeStore));
+
         // Remove all HTML comments
         htmlContent = htmlContent.replace(/<!--[\s\S]*?-->/g, '');
 
@@ -171,7 +182,7 @@ export default class Renderer {
             }
 
             // Recursively render the nested component
-            const nestedHtml = await Renderer.renderComponent(nestedComponent, allComponents, nestedData);
+            const nestedHtml = await Renderer.renderComponent(nestedComponent, allComponents, nestedData, '', codeStore, false);
             // Replace the placeholder in this component's HTML
             htmlContent = htmlContent.replace(placeholder, nestedHtml);
         }
@@ -196,11 +207,18 @@ export default class Renderer {
             const baseComponent = allComponents.find(c => c.name === baseComponentName);
             if (baseComponent) {
                 // Recursively render the base with our final HTML as its @[content]
-                htmlContent = await Renderer.renderComponent(baseComponent, allComponents, combinedData, htmlContent);
+                htmlContent = await Renderer.renderComponent(baseComponent, allComponents, combinedData, htmlContent, codeStore, false);
             } else {
                 logger.warn(`Base component "${baseComponentName}" not found.`);
             }
         }
+
+        htmlContent = htmlContent
+            .replace(/@ENV@/g, this.env)
+            .replace(/@ASSETS@/g, `/${this.env}/assets`);
+
+        // Restore code/pre blocks
+        if(isRoot) htmlContent = restoreCodeBlocks(htmlContent, codeStore);
 
         return htmlContent;
     }
