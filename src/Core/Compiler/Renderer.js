@@ -114,7 +114,7 @@ export default class Renderer {
             'utils/globalState.js',
         ];
 
-        const outputAssetsDir = path.join(outputDir, 'assets/Core');
+        const outputAssetsDir = path.join(outputDir, 'assets');
 
         for (const file of coreFilesToCopy) {
             const source = path.join(coreDir, file);
@@ -124,7 +124,19 @@ export default class Renderer {
             await fsExtra.copy(source, dest);
         }
 
-        logger.success(`Core scripts copied selectively to /Pub/${env}/assets/Core`);
+        logger.success(`Core scripts copied selectively to /Pub/${env}/assets`);
+
+        const appAssetsSrc = path.join(appRoot, 'assets');
+        const outputAppAssetsDir = path.join(outputDir, 'assets');
+
+        if (await fsExtra.pathExists(appAssetsSrc)) {
+            const entries = await fs.promises.readdir(appAssetsSrc);
+            if (entries.length) {
+                await fsExtra.ensureDir(outputAppAssetsDir);
+                await fsExtra.copy(appAssetsSrc, outputAppAssetsDir);
+                logger.success(`App assets copied recursively to /Pub/${env}/assets`);
+            }
+        }
 
         logger.success(`Build complete. Output saved to: /Pub/${env}`);
     }
@@ -218,7 +230,7 @@ export default class Renderer {
             .replace(/@ASSETS@/g, `/${this.env}/assets`);
 
         // Restore code/pre blocks
-        if(isRoot) htmlContent = restoreCodeBlocks(htmlContent, codeStore);
+        if (isRoot) htmlContent = restoreCodeBlocks(htmlContent, codeStore);
 
         return htmlContent;
     }
